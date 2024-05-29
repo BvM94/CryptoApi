@@ -1,15 +1,24 @@
 from fastapi import FastAPI
 from routers import users
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 app = FastAPI()
 
 #Routers
+#Forma de exponer recursos estaticos.
+app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(users.router)
 
 
 @app.get("/")
 async def root():
     return "Hello word!!!" 
+
+# Ruta específica para servir el favicon.ico
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("static/favicon.ico")
 
 """
 Instalar fastapi: 
