@@ -51,7 +51,7 @@ def get_user_by_email(email: str) -> User:
 def get_user(key: str, value) -> User:
     try:
         print(key, value)
-        user = user_schema(db_client.local.users.find_one({key:value}))
+        user = user_schema(db_client.users.find_one({key:value}))
         print(user)
     except:
         return None
@@ -59,7 +59,7 @@ def get_user(key: str, value) -> User:
 
 def get_all_user():
     try:
-        users = users_schema(db_client.local.users.find())
+        users = users_schema(db_client.users.find())
     except:
         raise not_found_exeption
     return users
@@ -68,8 +68,8 @@ def create_user(user: UserReduced):
     if isinstance(get_user_by_email(user.email), User):
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "El usuario ya existe.")
     
-    id = db_client.local.users.insert_one(dict(user)).inserted_id
-    new_user = user_schema(db_client.local.users.find_one({"_id":id}))
+    id = db_client.users.insert_one(dict(user)).inserted_id
+    new_user = user_schema(db_client.users.find_one({"_id":id}))
     
     return User(**new_user)
     
@@ -79,14 +79,14 @@ def update_user(id: str, user: UserReduced):
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "El email ya esta en uso.")   
     
     try:
-        db_client.local.users.find_one_and_replace({"_id": ObjectId(id)},dict(user))
+        db_client.users.find_one_and_replace({"_id": ObjectId(id)},dict(user))
     except:
         raise not_found_exeption
     
     return get_user_by_id(id)    
 
 def delete_user(id: str):
-    found = db_client.local.users.find_one_and_delete({"_id": ObjectId(id)})
+    found = db_client.users.find_one_and_delete({"_id": ObjectId(id)})
             
     if not found:
         raise not_found_exeption
